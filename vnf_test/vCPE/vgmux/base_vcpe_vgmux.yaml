@@ -204,24 +204,60 @@ resources:
       save_private_key: false
 
 
+
+  # VGMUX security group
+  vgmux_sg:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name:
+        str_replace:
+          template: base_rand
+          params:
+            base: onap_sg
+            rand: { get_resource: random-str }
+      description: security group used by ONAP
+      rules:
+        # All egress traffic
+        - direction: egress
+          ethertype: IPv4
+        - direction: egress
+          ethertype: IPv6
+        # ingress traffic
+        # ICMP
+        - protocol: icmp
+        - protocol: udp
+          port_range_min: 1
+          port_range_max: 65535
+        - protocol: tcp
+          port_range_min: 1
+          port_range_max: 65535
+
+
+
   # Virtual GMUX Instantiation
   vgmux_private_0_port:
     type: OS::Neutron::Port
     properties:
       network: { get_param: bng_gmux_private_net_id }
       fixed_ips: [{"subnet": { get_param: bng_gmux_private_subnet_id }, "ip_address": { get_param: vgmux_private_ip_0 }}]
+      security_groups:
+      - { get_resource: vgmux_sg }
 
   vgmux_private_1_port:
     type: OS::Neutron::Port
     properties:
       network: { get_param: onap_private_net_id }
       fixed_ips: [{"subnet": { get_param: onap_private_subnet_id }, "ip_address": { get_param: vgmux_private_ip_1 }}]
+      security_groups:
+      - { get_resource: vgmux_sg }
 
   vgmux_private_2_port:
     type: OS::Neutron::Port
     properties:
       network: { get_param: mux_gw_private_net_id }
       fixed_ips: [{"subnet": {  get_param: mux_gw_private_subnet_id }, "ip_address": { get_param: vgmux_private_ip_2 }}]
+      security_groups:
+      - { get_resource: vgmux_sg }
 
   vgmux_floating_ip:
     type: OS::Neutron::FloatingIP
