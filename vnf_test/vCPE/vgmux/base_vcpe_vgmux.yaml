@@ -223,6 +223,12 @@ resources:
       network: { get_param: mux_gw_private_net_id }
       fixed_ips: [{"subnet": {  get_param: mux_gw_private_subnet_id }, "ip_address": { get_param: vgmux_private_ip_2 }}]
 
+  vgmux_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: vgmux_private_1_port }
+
   vgmux_0:
     type: OS::Nova::Server
     properties:
@@ -231,9 +237,8 @@ resources:
       name: { get_param: vgmux_name_0 }
       key_name: { get_resource: my_keypair }
       networks:
-        - network: { get_param: public_net_id }
-        - port: { get_resource: vgmux_private_0_port }
         - port: { get_resource: vgmux_private_1_port }
+        - port: { get_resource: vgmux_private_0_port }
         - port: { get_resource: vgmux_private_2_port }
       metadata: {vnf_id: { get_param: vnf_id }, vf_module_id: { get_param: vf_module_id }}
       user_data_format: RAW
