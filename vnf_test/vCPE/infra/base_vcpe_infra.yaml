@@ -217,6 +217,12 @@ resources:
       network: { get_param: onap_private_net_id }
       fixed_ips: [{"subnet": { get_param: onap_private_subnet_id }, "ip_address": { get_param: vaaa_private_ip_1 }}]
 
+  vaaa_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: vaaa_private_1_port }
+
   vaaa_0:
     type: OS::Nova::Server
     properties:
@@ -225,9 +231,8 @@ resources:
       name: { get_param: vaaa_name_0 }
       key_name: { get_resource: my_keypair }
       networks:
-        - network: { get_param: public_net_id }
-        - port: { get_resource: vaaa_private_0_port }
         - port: { get_resource: vaaa_private_1_port }
+        - port: { get_resource: vaaa_private_0_port }
       metadata: {vnf_id: { get_param: vnf_id }, vf_module_id: { get_param: vf_module_id }}
       user_data_format: RAW
       user_data:
@@ -265,7 +270,7 @@ resources:
             curl -k __repo_url_blob__/org.onap.demo/vnfs/vcpe/__install_script_version__/v_aaa_install.sh -o /opt/v_aaa_install.sh
             cd /opt
             chmod +x v_aaa_install.sh
-            ./v_aaa_install.sh
+            #./v_aaa_install.sh
 
 
   # Virtual DNS Instantiation
@@ -281,6 +286,12 @@ resources:
       network: { get_param: onap_private_net_id }
       fixed_ips: [{"subnet": { get_param: onap_private_subnet_id }, "ip_address": { get_param: vdns_private_ip_1 }}]
 
+  vdns_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: vdns_private_1_port }
+
   vdns_0:
     type: OS::Nova::Server
     properties:
@@ -289,9 +300,8 @@ resources:
       name: { get_param: vdns_name_0 }
       key_name: { get_resource: my_keypair }
       networks:
-        - network: { get_param: public_net_id }
-        - port: { get_resource: vdns_private_0_port }
         - port: { get_resource: vdns_private_1_port }
+        - port: { get_resource: vdns_private_0_port }
       metadata: {vnf_id: { get_param: vnf_id }, vf_module_id: { get_param: vf_module_id }}
       user_data_format: RAW
       user_data:
@@ -325,7 +335,7 @@ resources:
             curl -k __repo_url_blob__/org.onap.demo/vnfs/vcpe/__install_script_version__/v_dns_install.sh -o /opt/v_dns_install.sh
             cd /opt
             chmod +x v_dns_install.sh
-            ./v_dns_install.sh
+            #./v_dns_install.sh
 
 
   # Virtual DHCP Instantiation
@@ -341,6 +351,12 @@ resources:
       network: { get_param: onap_private_net_id }
       fixed_ips: [{"subnet": { get_param: onap_private_subnet_id }, "ip_address": { get_param: vdhcp_private_ip_1 }}]
 
+  vdhcp_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: vdhcp_private_1_port }
+
   vdhcp_0:
     type: OS::Nova::Server
     properties:
@@ -349,9 +365,8 @@ resources:
       name: { get_param: vdhcp_name_0 }
       key_name: { get_resource: my_keypair }
       networks:
-        - network: { get_param: public_net_id }
-        - port: { get_resource: vdhcp_private_0_port }
         - port: { get_resource: vdhcp_private_1_port }
+        - port: { get_resource: vdhcp_private_0_port }
       metadata: {vnf_id: { get_param: vnf_id }, vf_module_id: { get_param: vf_module_id }}
       user_data_format: RAW
       user_data:
@@ -387,7 +402,7 @@ resources:
             curl -k __repo_url_blob__/org.onap.demo/vnfs/vcpe/__install_script_version__/v_dhcp_install.sh -o /opt/v_dhcp_install.sh
             cd /opt
             chmod +x v_dhcp_install.sh
-            ./v_dhcp_install.sh
+            #./v_dhcp_install.sh
 
   # vWEB instantiaion
   vweb_private_0_port:
@@ -402,6 +417,13 @@ resources:
       network: { get_param: onap_private_net_id }
       fixed_ips: [{"subnet": { get_param: onap_private_subnet_id }, "ip_address": { get_param: vweb_private_ip_1 }}]
 
+  vweb_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network_id: { get_param: public_net_id }
+      port_id: { get_resource: vweb_private_1_port }
+
+
 
   vweb_0:
     type: OS::Nova::Server
@@ -411,9 +433,8 @@ resources:
       name: { get_param: vweb_name_0 }
       key_name: { get_resource: my_keypair }
       networks:
-        - network: { get_param: public_net_id }
-        - port: { get_resource: vweb_private_0_port }
         - port: { get_resource: vweb_private_1_port }
+        - port: { get_resource: vweb_private_0_port }
       metadata: {vnf_id: { get_param: vnf_id }, vf_module_id: { get_param: vf_module_id }}
       user_data_format: RAW
       user_data:
@@ -447,4 +468,4 @@ resources:
             curl -k __repo_url_blob__/org.onap.demo/vnfs/vcpe/__install_script_version__/v_web_install.sh -o /opt/v_web_install.sh
             cd /opt
             chmod +x v_web_install.sh
-            ./v_web_install.sh
+            #./v_web_install.sh
