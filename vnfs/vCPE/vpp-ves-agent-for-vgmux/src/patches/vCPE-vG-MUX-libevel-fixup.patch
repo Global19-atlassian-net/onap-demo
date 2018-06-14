@@ -1,8 +1,8 @@
 diff --git a/vnfs/VES5.0/evel/evel-library/code/evel_library/evel.h b/vnfs/VES5.0/evel/evel-library/code/evel_library/evel.h
-index 0ae1713..be3ae6c 100644
+index 8f49798..a6831e3 100644
 --- a/vnfs/VES5.0/evel/evel-library/code/evel_library/evel.h
 +++ b/vnfs/VES5.0/evel/evel-library/code/evel_library/evel.h
-@@ -1715,13 +1715,14 @@ void evel_fault_type_set(EVENT_FAULT * fault, const char * const type);
+@@ -1846,13 +1846,14 @@ void evel_fault_type_set(EVENT_FAULT * fault, const char * const type);
   * @param   measurement_interval
   * @param event_name    Unique Event Name
   * @param event_id    A universal identifier of the event for analysis etc
@@ -19,7 +19,7 @@ index 0ae1713..be3ae6c 100644
  /**************************************************************************//**
   * Free a Measurement.
 diff --git a/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_event.c b/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_event.c
-index 4de49bc..de6b362 100644
+index 1656fa7..fc71518 100644
 --- a/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_event.c
 +++ b/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_event.c
 @@ -167,7 +167,8 @@ void evel_init_header(EVENT_HEADER * const header,const char *const eventname)
@@ -29,37 +29,46 @@ index 4de49bc..de6b362 100644
 -  header->source_name = strdup(openstack_vm_name());
 +  /* header->source_name = strdup(openstack_vm_name()); */
 +  header->source_name = strdup(openstack_vnf_id()); /* vCPE quick hack */
-   header->sequence = event_sequence;
+   header->sequence = 0;
    header->start_epoch_microsec = header->last_epoch_microsec;
    header->major_version = EVEL_HEADER_MAJOR_VERSION;
-@@ -181,7 +182,8 @@ void evel_init_header(EVENT_HEADER * const header,const char *const eventname)
+@@ -180,8 +181,11 @@ void evel_init_header(EVENT_HEADER * const header,const char *const eventname)
+   evel_init_option_string(&header->event_type);
    evel_init_option_string(&header->nfcnaming_code);
    evel_init_option_string(&header->nfnaming_code);
-   evel_force_option_string(&header->reporting_entity_id, openstack_vm_uuid());
--  evel_force_option_string(&header->source_id, openstack_vm_uuid());
+-  evel_init_option_string(&header->reporting_entity_id);
+-  evel_init_option_string(&header->source_id);
++  /* evel_init_option_string(&header->reporting_entity_id); */
++  evel_force_option_string(&header->reporting_entity_id, openstack_vm_uuid()); /* from original patch */
++  /* evel_init_option_string(&header->source_id); */
 +  /* evel_force_option_string(&header->source_id, openstack_vm_uuid()); */
 +  evel_force_option_string(&header->source_id, openstack_vnf_id()); /* vCPE quick hack */
    evel_init_option_intheader(&header->internal_field);
+   dlist_initialize(&header->batch_events);
  
-   EVEL_EXIT();
-@@ -216,7 +218,8 @@ void evel_init_header_nameid(EVENT_HEADER * const header,const char *const event
+@@ -220,7 +224,8 @@ void evel_init_header_nameid(EVENT_HEADER * const header,const char *const event
    header->last_epoch_microsec = tv.tv_usec + 1000000 * tv.tv_sec;
    header->priority = EVEL_PRIORITY_NORMAL;
    header->reporting_entity_name = strdup(openstack_vm_name());
 -  header->source_name = strdup(openstack_vm_name());
 +  /* header->source_name = strdup(openstack_vm_name()); */
 +  header->source_name = strdup(openstack_vnf_id()); /* vCPE quick hack */
-   header->sequence = event_sequence;
+   header->sequence = 0;
    header->start_epoch_microsec = header->last_epoch_microsec;
    header->major_version = EVEL_HEADER_MAJOR_VERSION;
-@@ -230,7 +233,63 @@ void evel_init_header_nameid(EVENT_HEADER * const header,const char *const event
+@@ -232,8 +237,67 @@ void evel_init_header_nameid(EVENT_HEADER * const header,const char *const event
+   evel_init_option_string(&header->event_type);
    evel_init_option_string(&header->nfcnaming_code);
    evel_init_option_string(&header->nfnaming_code);
-   evel_force_option_string(&header->reporting_entity_id, openstack_vm_uuid());
--  evel_force_option_string(&header->source_id, openstack_vm_uuid());
+-  evel_init_option_string(&header->reporting_entity_id);
+-  evel_init_option_string(&header->source_id);
++  /* evel_init_option_string(&header->reporting_entity_id); */
++  evel_force_option_string(&header->reporting_entity_id, openstack_vm_uuid());
++  /* evel_init_option_string(&header->source_id); */
 +  /* evel_force_option_string(&header->source_id, openstack_vm_uuid()); */
 +  evel_force_option_string(&header->source_id, openstack_vnf_id()); /* vCPE quick hack */
 +  evel_init_option_intheader(&header->internal_field);
++  dlist_initialize(&header->batch_events);
 +
 +  EVEL_EXIT();
 +}
@@ -115,10 +124,10 @@ index 4de49bc..de6b362 100644
 +  /* evel_force_option_string(&header->source_id, openstack_vm_uuid()); */
 +  evel_force_option_string(&header->source_id, openstack_vnf_id()); /* vCPE quick hack */
    evel_init_option_intheader(&header->internal_field);
+   dlist_initialize(&header->batch_events);
  
-   EVEL_EXIT();
 diff --git a/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_scaling_measurement.c b/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_scaling_measurement.c
-index b73eb97..2446e02 100644
+index 677cb8e..96691b0 100644
 --- a/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_scaling_measurement.c
 +++ b/vnfs/VES5.0/evel/evel-library/code/evel_library/evel_scaling_measurement.c
 @@ -40,13 +40,14 @@
@@ -147,10 +156,10 @@ index b73eb97..2446e02 100644
    measurement->measurement_interval = measurement_interval;
    dlist_initialize(&measurement->additional_info);
 diff --git a/vnfs/VES5.0/evel/evel-library/code/evel_library/metadata.c b/vnfs/VES5.0/evel/evel-library/code/evel_library/metadata.c
-index 62ea6b5..6c322db 100644
+index b865074..400ebab 100644
 --- a/vnfs/VES5.0/evel/evel-library/code/evel_library/metadata.c
 +++ b/vnfs/VES5.0/evel/evel-library/code/evel_library/metadata.c
-@@ -60,6 +60,11 @@ static char vm_uuid[MAX_METADATA_STRING+1] = {0};
+@@ -61,6 +61,11 @@ static char vm_uuid[MAX_METADATA_STRING+1] = {0};
  static char vm_name[MAX_METADATA_STRING+1] = {0};
  
  /**************************************************************************//**
@@ -162,7 +171,7 @@ index 62ea6b5..6c322db 100644
   * How many metadata elements we allow for in the retrieved JSON.
   *****************************************************************************/
  static const int MAX_METADATA_TOKENS = 128;
-@@ -290,6 +295,19 @@ EVEL_ERR_CODES openstack_metadata(int verbosity)
+@@ -291,6 +296,19 @@ EVEL_ERR_CODES openstack_metadata(int verbosity)
      {
        EVEL_DEBUG("VM Name: %s", vm_name);
      }
@@ -182,17 +191,17 @@ index 62ea6b5..6c322db 100644
    }
  
  exit_label:
-@@ -319,6 +337,9 @@ void openstack_metadata_initialize()
+@@ -325,6 +343,9 @@ void openstack_metadata_initialize()
    strncpy(vm_name,
            "Dummy VM name - No Metadata available",
            MAX_METADATA_STRING);
 +  strncpy(vnf_id,
 +          "Dummy VNF ID - No Metadata available",
 +          MAX_METADATA_STRING);
- }
  
- /**************************************************************************//**
-@@ -591,3 +612,13 @@ const char *openstack_vm_uuid()
+   if( gethostname(hostname, 1024) != -1 )
+       strcpy(vm_name,hostname);
+@@ -634,3 +655,13 @@ const char *openstack_vm_uuid()
  {
    return vm_uuid;
  }
