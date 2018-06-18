@@ -48,13 +48,14 @@ then
 	IP=$(cat /opt/config/oam_ipaddr.txt)
 	BITS=$(cat /opt/config/oam_cidr.txt | cut -d"/" -f2)
 	NETMASK=$(cdr2mask $BITS)
-	echo "auto eth2" >> /etc/network/interfaces
-	echo "iface eth2 inet static" >> /etc/network/interfaces
+	INTERFACE=$(ip a | grep $IP | awk '{print $NF}')
+	echo "auto $INTERFACE" >> /etc/network/interfaces
+	echo "iface $INTERFACE inet static" >> /etc/network/interfaces
 	echo "    address $IP" >> /etc/network/interfaces
 	echo "    netmask $NETMASK" >> /etc/network/interfaces
 	echo "    mtu $MTU" >> /etc/network/interfaces
 
-	ifup eth2
+	ifup $INTERFACE
     fi
 fi  # endif BUILD_STATE != "build"
 
