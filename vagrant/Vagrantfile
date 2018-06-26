@@ -1,18 +1,20 @@
-$num_compute_nodes = 2
+$num_compute_nodes = 1
 
 Vagrant.configure("2") do |config|
 
-  config.vm.box = "elastic/ubuntu-16.04-x86_64"
-  config.ssh.keys_only = true
+  #config.vm.box = "elastic/ubuntu-16.04-x86_64"
 
   config.vm.provider :libvirt do |libvirt|
     libvirt.management_network_address = '192.168.240.0/24'
+    libvirt.nested = "true"
+    libvirt.cpu_mode = "host-passthrough"
   end
 
   config.vm.provision "shell", path: "bootstrap.sh", privileged: false
   config.vm.synced_folder "..", "/demo"
 
   config.vm.define "control" do |config|
+    config.vm.box = "ubuntu1604"
     config.vm.hostname = "control"
     config.vm.network "private_network", ip: "192.168.0.10"
     config.vm.network "private_network", ip: "192.168.1.10"
@@ -25,6 +27,7 @@ Vagrant.configure("2") do |config|
 
   (1 .. $num_compute_nodes).each do |n|
     config.vm.define vm_name = "compute-#{n}" do |config|
+      config.vm.box = "ubuntu1604"
       config.vm.hostname = vm_name
       config.vm.network "private_network", ip: "192.168.0.#{n+20}"
       config.vm.network "private_network", ip: "192.168.1.#{n+20}"
@@ -32,7 +35,7 @@ Vagrant.configure("2") do |config|
       config.vm.provider :libvirt do |libvirt|
         libvirt.cpus = 32
         libvirt.memory = 245760
-        libvirt.storage :file, :size => '1000G'
+        #libvirt.storage :file, :size => '1000G'
       end
     end
   end
