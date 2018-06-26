@@ -17,3 +17,6 @@ sudo ifconfig br-ex $inet up
 sudo ip route del default
 sudo ip route add default via 192.168.0.254
 echo "source /vagrant/openrc" >> $HOME/.bash_profile
+sudo rmmod kvm-intel
+sudo sh -c "echo 'options kvm-intel nested=y' >> /etc/modprobe.d/dist.conf"
+sudo modprobe kvm-intel
