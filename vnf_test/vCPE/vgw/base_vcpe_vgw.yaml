@@ -271,7 +271,8 @@ resources:
             echo "__vg_vgmux_tunnel_vni__" > /opt/config/vg_vgmux_tunnel_vni.txt
 
             # Download and run install script
-            curl -k __repo_url_blob__/org.onap.demo/vnfs/vcpe/__install_script_version__/v_gw_install.sh -o /opt/v_gw_install.sh
+            #curl -k __repo_url_blob__/org.onap.demo/vnfs/vcpe/__install_script_version__/v_gw_install.sh -o /opt/v_gw_install.sh
+            curl https://raw.githubusercontent.com/cncf/onap-demo/vnf_test_noonap/vnfs/vCPE/scripts/v_gw_install.sh -o /opt/v_gw_install.sh
             cd /opt
             chmod +x v_gw_install.sh
             ./v_gw_install.sh
