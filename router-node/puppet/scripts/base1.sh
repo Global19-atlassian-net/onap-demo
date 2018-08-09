@@ -12,7 +12,7 @@ sed -i -r -e 's/^#*\s*(net.ipv4.ip_forward)\s*=.*$/\1 = 1/' /etc/sysctl.conf
 
 # Disable services we know we do not want
 # https://www.hscripts.com/tutorials/linux-services/
-for x in auditd kdump mdmonitor nfslock rpcgssd; do chkconfig ${x} off ; done
+for x in auditd mdmonitor nfslock rpcgssd; do chkconfig ${x} off ; done
 
 # Enable services we know we want, others will be added later
 for x in iptables ; do chkconfig ${x} on ; done

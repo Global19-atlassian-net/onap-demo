@@ -1,0 +1,69 @@
+
+heat_template_version: 2015-10-15
+
+description: Heat template to create onap private network and tenant router
+
+##############
+#            #
+# PARAMETERS #
+#            #
+##############
+
+parameters:
+  public_net_id:
+    type: string
+    description: The ID of the Public network for floating IP address allocation
+
+  oam_network_cidr:
+    type: string
+    description: CIDR of the OAM ONAP network
+
+  dns_list:
+    type: comma_delimited_list
+    description: List of External DNS for OAM ONAP network
+
+  external_dns:
+    type: comma_delimited_list
+    description: List of External DNS
+
+resources:
+  random-str:
+    type: OS::Heat::RandomString
+    properties:
+      length: 4
+
+  # ONAP management private network
+  oam_onap:
+    type: OS::Neutron::Net
+    properties:
+      name:
+        str_replace:
+          template: oam_onap_rand
+          params:
+            rand: { get_resource: random-str }
+
+  oam_onap_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name:
+        str_replace:
+          template: oam_onap_rand
+          params:
+            rand: { get_resource: random-str }
+      network_id: { get_resource: oam_onap }
+      cidr: { get_param: oam_network_cidr }
+      dns_nameservers: { get_param: dns_list }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_net_id }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: oam_onap_subnet }
+
+

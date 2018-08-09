@@ -48,13 +48,14 @@ then
 	IP=$(cat /opt/config/oam_ipaddr.txt)
 	BITS=$(cat /opt/config/oam_cidr.txt | cut -d"/" -f2)
 	NETMASK=$(cdr2mask $BITS)
-	echo "auto eth2" >> /etc/network/interfaces
-	echo "iface eth2 inet static" >> /etc/network/interfaces
+	INTERFACE=$(ip a | grep $IP | awk '{print $NF}')
+	echo "auto $INTERFACE" >> /etc/network/interfaces
+	echo "iface $INTERFACE inet static" >> /etc/network/interfaces
 	echo "    address $IP" >> /etc/network/interfaces
 	echo "    netmask $NETMASK" >> /etc/network/interfaces
 	echo "    mtu $MTU" >> /etc/network/interfaces
 
-	ifup eth2
+	ifup $INTERFACE
     fi
 fi  # endif BUILD_STATE != "build"
 
@@ -207,7 +208,7 @@ EOF
     NICS=`echo ${NICS} | sed 's/[0]\+\([0-9]\)/\1/g' | sed 's/[.:]/\//g'`
 
     MUX_GW_NIC=GigabitEthernet`echo ${NICS} | cut -d " " -f 2`  # second interface in list
-    GW_PUB_NIC=GigabitEthernet`echo ${NICS} | cut -d " " -f 4`   # fourth interface in list
+    GW_PUB_NIC=GigabitEthernet`echo ${NICS} | cut -d " " -f 3`   # third interface in list
 
 cat > /etc/vpp/setup.gate << EOF
 set int state ${MUX_GW_NIC} up
